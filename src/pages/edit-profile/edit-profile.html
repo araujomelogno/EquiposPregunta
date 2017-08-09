@@ -1,0 +1,47 @@
+<ion-header>
+	<ion-navbar>
+		<button ion-button menuToggle>
+      Atrás
+    </button>
+		<ion-title>Perfil</ion-title>
+		<ion-buttons end>
+			<button ion-button (click)="saveChanges()">
+        Guardar
+      </button>
+		</ion-buttons>
+	</ion-navbar>
+</ion-header>
+<ion-content padding block height="100%">
+  <ion-list>
+    <ion-item>
+      <ion-label>Email</ion-label>
+      <ion-input [(ngModel)]="email" placeholder="Email" type="email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Password</ion-label>
+      <ion-input [(ngModel)]="password" placeholder="Password" type="password"></ion-input>
+    </ion-item>
+
+
+    <ion-item>
+      <ion-label>Nombre</ion-label>
+      <ion-input [(ngModel)]="name" placeholder="Nombre" type="text"></ion-input>
+    </ion-item>
+
+
+
+    <ion-item>
+      <ion-label>Nacimiento</ion-label>
+      <ion-datetime displayFormat="DD MM YY" pickerFormat="DD MM YY" [(ngModel)]="birthdate"></ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Sexo</ion-label>
+      <ion-select [(ngModel)]="sex">
+        <ion-option value="female">Femenino</ion-option>
+        <ion-option value="male">Masculino</ion-option>
+      </ion-select>
+    </ion-item>
+  </ion-list> 
+
+</ion-content>
