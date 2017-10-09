@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LoadingController, IonicPage, ActionSheetController, AlertController, NavController, ToastController } from 'ionic-angular';
+import { MenuController, LoadingController, IonicPage, ActionSheetController, AlertController, NavController, ToastController } from 'ionic-angular';
 import { SurveyHolder } from '../../services/SurveyHolder';
 import { SurveyDataModel } from '../../models/SurveyDataModel';
 import { Question } from '../../models/questions/Question'
@@ -8,12 +8,8 @@ import { AuthProvider } from '../../providers/auth/auth';
 import { Http } from '@angular/http';
 import { User } from '@ionic/cloud-angular';
 import { UserData } from '../../providers/user-data';
-/** 
- * Generated class for the HomePage page.
- *
- * See http://ionicframework.com/docs/components/#navigation for more info
- * on Ionic pages and navigation.
- */
+import { Storage } from '@ionic/storage';
+
 
 @IonicPage()
 @Component({
@@ -23,9 +19,15 @@ import { UserData } from '../../providers/user-data';
 export class HomePage {
   surveys: Array<SurveyDataModel>;
   surveyList: [any];
-  constructor(public userData:UserData,public user: User, public alertCtrl: AlertController, public http: Http, public navCtrl: NavController, public surveyProvider: SurveyProvider, public actionSheetCtrl: ActionSheetController, public toastCtrl: ToastController, public loadingController: LoadingController, public authProvider: AuthProvider) {
+  constructor(public storage: Storage,
+    public surveyHolder: SurveyHolder, public menu: MenuController,
+    public userData: UserData, public user: User,
+    public alertCtrl: AlertController, public http: Http,
+    public navCtrl: NavController, public surveyProvider: SurveyProvider,
+    public actionSheetCtrl: ActionSheetController, public toastCtrl: ToastController,
+    public loadingController: LoadingController, public authProvider: AuthProvider) {
     this.surveys = [];
-    let desayunos = new SurveyDataModel('', '', 'Desayunos', 'Nos Interesa saber cómo son tus desayunos');
+    let desayunos = new SurveyDataModel('', 'Desayunos', 'Nos Interesa saber cómo son tus desayunos');
     let q1 = new Question();
     q1.questionType = 'textbox';
     this.ionViewLoaded();
@@ -113,8 +115,8 @@ export class HomePage {
 
 
     this.surveys.push(desayunos);
-    this.surveys.push(new SurveyDataModel('', '', 'Situación económica', '¿Cómo ves la situación económica del país '));
-    this.surveys.push(new SurveyDataModel('', '', 'Situación laboral', '¿Estás contento con tu trabajo?'));
+    this.surveys.push(new SurveyDataModel('', 'Situación económica', '¿Cómo ves la situación económica del país '));
+    this.surveys.push(new SurveyDataModel('', 'Situación laboral', '¿Estás contento con tu trabajo?'));
 
 
 
@@ -152,20 +154,46 @@ export class HomePage {
 
   }
 
-  openSurvey(survey: any) {
+  openSurvey(survey: SurveyDataModel) {
     debugger;
-    this.surveyProvider.getSurvey(survey._id).then((data) => {
-      survey = data;
-      let surveyManager: SurveyHolder = new SurveyHolder(this.userData,this.surveyProvider, this.loadingController, this.authProvider, this.user, this.alertCtrl, this.http, survey, this.navCtrl, this.toastCtrl, this.actionSheetCtrl);
-      surveyManager.startSurvey();
-    }, (err) => {
-      console.log(err);
+    this.storage.get(survey.title).then((value) => {
+      if (!value) {
+        this.surveyProvider.getSurvey(survey._id).then((data) => {
+          survey = <SurveyDataModel>data;
+          this.surveyHolder.setSurvey(survey);
+          this.surveyHolder.startSurvey();
+        }, (err) => {
+          console.log(err);
+        });
+      } else {
+        debugger;
+        this.storage.remove(survey.title);
+        survey = value.survey;
+        this.surveyHolder.setSurvey(survey);
+        this.surveyHolder.setSetAnswers(value.surveyAnswers);
+        this.surveyHolder.setCurrentQuestionIndex(value.currentQuestionIndex);
+        this.surveyHolder.setStarted(value.surveyStarted);
+        this.surveyHolder.setCurrentQuestion(value.currentQuestion);
+        //lo saco de la listas pausadas
+        this.storage.get('surveyList').then((surveyList) => {
+          if (surveyList) {
+            let slist = <{ surveyName: string, pausedDate: Date }[]>surveyList;
+            for (let i = 0; i < slist.length; i++) {
+              if (slist[i].surveyName == survey.title) {
+                slist.splice(i, 1);
+              }
+            }
+            this.storage.set('surveyList', slist);
+          }
+        });
+        this.surveyHolder.enableInSurveyMenu();
+        this.surveyHolder.gotoQuestion();
+      }
     });
 
 
+
   }
-
-
 
   removeSurvey(survey: SurveyDataModel) {
     for (let i = 0; i < this.surveys.length; i++) {

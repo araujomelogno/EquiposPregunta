@@ -5,7 +5,7 @@ export class SurveyDataModel {
     id: number;
    
     questions: Question[];
-    constructor(public  name:String,public client:String,public title:String ,public  description:String) {
+    constructor(public client:string,public title:string ,public  description:string) {
           
         this.questions = [];
     }

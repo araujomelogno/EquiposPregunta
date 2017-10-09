@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { SurveyDataModel } from '../models/SurveyDataModel';
 
 
-import { NavController, LoadingController, ActionSheetController, ToastController, AlertController } from 'ionic-angular';
+import { MenuController, NavController, LoadingController, ActionSheetController, ToastController, AlertController } from 'ionic-angular';
 import { Question } from '../models/questions/Question';
 import { HomePage } from '../pages/home/home';
 import { TextBoxQuestionPage } from '../pages/text-box-question/text-box-question';
@@ -12,7 +12,7 @@ import { RangeQuestionPage } from '../pages/range-question/range-question';
 import { GridQuestionPage } from '../pages/grid-question/grid-question';
 import { TextFieldQuestionPage } from '../pages/text-field-question/text-field-question';
 import { Http } from '@angular/http';
-import { User } from '@ionic/cloud-angular';
+
 import 'rxjs/add/operator/map';
 import { AuthProvider } from '../providers/auth/auth';
 import { UserData } from '../providers/user-data';
@@ -26,17 +26,51 @@ export class SurveyHolder {
 
     surveyStarted: Date;
     surveyEnded: Date;
-
-    constructor(public userData:UserData,public surveyProvider: SurveyProvider, public loadingController: LoadingController, public authProvider: AuthProvider, public user: User, public alertCtrl: AlertController, public http: Http, public aSurvey: SurveyDataModel, public nav: NavController, public toastCtrl: ToastController, public actionController: ActionSheetController) {
-        this.survey = aSurvey;
-        this.currentQuestion = aSurvey.questions[0];
+    nav:NavController;
+    constructor(public menu: MenuController, public userData: UserData,
+        public surveyProvider: SurveyProvider, public loadingController: LoadingController,
+        public authProvider: AuthProvider, public alertCtrl: AlertController,
+        public http: Http,
+        public toastCtrl: ToastController, public actionController: ActionSheetController) {
     }
 
+    setStarted(started:Date){
+        this.surveyStarted = started;
+    }
+    setCurrentQuestionIndex(index: number) {
+        this.currentQuestionIndex = index;
+    }
+    setSetAnswers(surveyAns: any) {
+        this.surveyAnswers = surveyAns;
+    }
+    setCurrentQuestion(question: Question) {
+        this.currentQuestion = question;
+    }
+    setSurvey(asurvey: SurveyDataModel) {
+        debugger;
+        this.survey = asurvey;
+        this.currentQuestion = this.survey.questions[0];
+    }
+    getSurveyDataToLocallyPersist() {
+        return {
+            survey: this.survey,
+            currentQuestion: this.currentQuestion,
+            surveyAnswers: this.surveyAnswers,
+            currentQuestionIndex: this.currentQuestionIndex,
+            surveyStarted: this.surveyStarted
+        };
+    }
+
+    setNav(anav: NavController){
+        this.nav = anav;
+    }
 
     startSurvey() {
         if (this.surveyStarted == null)
             this.surveyStarted = new Date();
         if (this.survey.questions != null && this.survey.questions.length > 0) {
+            this.menu.enable(false, 'loggedInMenu');
+            this.menu.enable(true, 'surveyMenu');
             this.gotoQuestion();
         } else {
             let toast = this.toastCtrl.create({
@@ -45,6 +79,11 @@ export class SurveyHolder {
             });
             toast.present();
         }
+    }
+
+    enableInSurveyMenu(){
+        this.menu.enable(false, 'loggedInMenu');
+        this.menu.enable(true, 'surveyMenu');
     }
 
     gotoQuestion() {
@@ -110,7 +149,7 @@ export class SurveyHolder {
                         });
 
                         loading.present();
-                        this.surveyProvider.submitSurvey(this.userData,this.survey, this.surveyStarted, this.surveyEnded, this.surveyAnswers).then(
+                        this.surveyProvider.submitSurvey(this.userData, this.survey, this.surveyStarted, this.surveyEnded, this.surveyAnswers).then(
 
                             (res) => {
                                 loading.dismiss();
@@ -120,6 +159,8 @@ export class SurveyHolder {
                                     buttons: [{
                                         text: 'OK',
                                         handler: () => {
+                                            this.menu.enable(false, 'surveyMenu');
+                                            this.menu.enable(true, 'loggedInMenu');
                                             this.nav.setRoot(HomePage);
                                         }
                                     }]

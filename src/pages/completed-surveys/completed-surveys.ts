@@ -1,26 +1,44 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
-
-/*
-  Generated class for the CompletedSurveys page.
-
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
+import { AlertController,IonicPage ,LoadingController} from 'ionic-angular';
+import { UserData } from '../../providers/user-data';
+import { SurveyProvider } from '../../providers/survey-provider'; 
+@IonicPage()
 @Component({
   selector: 'page-completed-surveys',
   templateUrl: 'completed-surveys.html'
 })
 export class CompletedSurveysPage {
-  completedSurveys: { name: string, uploaded: string }[] = [];
-  constructor(public navCtrl: NavController) {
-      this.completedSurveys.push({name:"Estudio 1 ",uploaded:"08/11/2016"});
-      this.completedSurveys.push({name:"Estudio 5 ",uploaded:"04/11/2016"});
-      this.completedSurveys.push({name:"Estudio 12 ",uploaded:"01/11/2016"});
+  completedSurveys: { surveyTitle: string, surveyDescription: string , started:Date }[] = [];
+  constructor( public loadingController: LoadingController,public surveyProvider:SurveyProvider, 
+  public userData:UserData, public alertCtrl:AlertController) { 
    }
 
   ionViewDidLoad() {
     console.log('Hello CompletedSurveys Page');
+    let loading = this.loadingController.create({
+      content: "Obteniendo encuestas completas"
+    });
+
+    loading.present();
+    this.surveyProvider.getCompletedSurveys(this.userData).then((data) => {
+      debugger;
+      this.completedSurveys = <[any]>data;
+      loading.dismiss();
+    }, (err) => {
+      loading.dismiss();
+      let alert = this.alertCtrl.create({
+        title: 'Equipos Pregunta',
+        subTitle: 'Error al obtener encuestas completas',
+        buttons: [{
+          text: 'cancel',
+          role: 'canel'
+
+        }]
+      });
+      alert.present();
+
+      console.log(err);
+    });
   }
 
 }

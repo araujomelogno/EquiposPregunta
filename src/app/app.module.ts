@@ -11,9 +11,9 @@ import { IonicStorageModule } from '@ionic/storage';
 
 import { ConferenceApp } from './app.component';
 import { SurveyProvider } from '../providers/survey-provider';
-
+import { PausedSurveysPage } from '../pages/paused-surveys/paused-surveys';
 import { SurveyHolder } from '../services/SurveyHolder';
-
+import { EditProfilePage } from '../pages/edit-profile/edit-profile';
 import { AboutPage } from '../pages/about/about';
 import { PopoverPage } from '../pages/about-popover/about-popover';
 import { AccountPage } from '../pages/account/account';
@@ -46,7 +46,7 @@ import { ResetPasswordPage } from '../pages/reset-password/reset-password';
 
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { AuthProvider } from '../providers/auth/auth';
-  
+
 const cloudSettings: CloudSettings = {
   'core': {
     'app_id': '7cb0ac37'
@@ -55,9 +55,11 @@ const cloudSettings: CloudSettings = {
 
 @NgModule({
   declarations: [
+    PausedSurveysPage,
     GridQuestionPage,
     MultipleChoiceQuestionPage,
     RangeQuestionPage,
+    EditProfilePage,
     SingleChoiceQuestionPage,
     TextBoxQuestionPage,
     TextFieldQuestionPage,
@@ -97,7 +99,11 @@ const cloudSettings: CloudSettings = {
         { component: SupportPage, name: 'SupportPage', segment: 'support' },
         { component: LoginPage, name: 'LoginPage', segment: 'login' },
         { component: AccountPage, name: 'AccountPage', segment: 'account' },
-        { component: SignupPage, name: 'SignupPage', segment: 'signup' }
+        { component: SignupPage, name: 'SignupPage', segment: 'signup' },
+        { component: EditProfilePage, name: 'EditProfilePage', segment: 'profile' },
+        { component: HomePage, name: 'HomePage', segment: 'home' },
+        { component: CompletedSurveysPage, name: 'CompletedSurveysPage', segment: 'home' },
+        { component: PausedSurveysPage, name: 'PausedSurveysPage', segment: 'home' }
       ]
     }),
     CloudModule.forRoot(cloudSettings),
@@ -106,6 +112,7 @@ const cloudSettings: CloudSettings = {
   ],
   bootstrap: [IonicApp],
   entryComponents: [
+    PausedSurveysPage,
     GridQuestionPage,
     MultipleChoiceQuestionPage,
     RangeQuestionPage,
@@ -113,6 +120,7 @@ const cloudSettings: CloudSettings = {
     TextBoxQuestionPage,
     TextFieldQuestionPage,
     CompletedSurveysPage,
+    EditProfilePage,
     ConferenceApp,
     AboutPage,
     AccountPage,
@@ -139,8 +147,9 @@ const cloudSettings: CloudSettings = {
     SplashScreen,
     SurveyHolder,
     SurveyProvider,
-    Storage,
-    AuthProvider
+    AuthProvider, 
+    
+    Storage
   ]
 })
 export class AppModule { }

@@ -1,0 +1,14 @@
+A nivel de App:
+- REcibir push notifications
+- Hcer vista de gamification 
+- logica de saltos 
+
+A nivel de servidor: 
+- Definir push notifications
+- Definir conexxion a mongoDB 
+- Exportar la base 
+- guardar encuesta 
+- guardar estudios 
+- Asociar panelistas 
+- Ver estado del panel 
+-

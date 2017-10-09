@@ -36,6 +36,26 @@ export class SurveyProvider {
 
   }
 
+
+  getCompletedSurveys( userData:UserData) {
+    debugger;
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+
+    return new Promise(resolve => {
+      let headers = new Headers();
+      headers.append('Content-Type', 'application/json');
+      this.http.post('https://equipos-pregunta.herokuapp.com/api/completedSurveys', JSON.stringify({ user: userData.getCurrentUser().email }), { headers: headers })
+        .map(res => res.json())
+        .subscribe((data) => {
+          debugger;
+          resolve(data);
+        });
+
+    });
+
+  }
+
   submitSurvey(userData:UserData,survey: SurveyDataModel, surveyStarted: Date, surveyEnded: Date, surveyAnswers: { questionLabel: String, answer: String }[]) {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
@@ -46,7 +66,9 @@ export class SurveyProvider {
       headers.append('Content-Type', 'application/json');
       let statistics = {
         user: userData.getCurrentUser().email,
-        studyId: survey._id,
+        studyId: survey.id,
+        surveyTitle : survey.title,
+        surveyDescription: survey.description,
         started: surveyStarted,
         ended: surveyEnded
       }

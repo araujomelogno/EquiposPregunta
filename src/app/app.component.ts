@@ -1,22 +1,24 @@
 import { Component, ViewChild } from '@angular/core';
 
-import { Events, MenuController, Nav, Platform } from 'ionic-angular';
+import { Events, AlertController, MenuController, Nav, Platform } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { Storage } from '@ionic/storage';
 
-import { AboutPage } from '../pages/about/about';
-import { AccountPage } from '../pages/account/account';
+//import { AboutPage } from '../pages/about/about';
+//import { AccountPage } from '../pages/account/account';
 import { LoginPage } from '../pages/login/login';
-import { MapPage } from '../pages/map/map';
+//import { MapPage } from '../pages/map/map';
 import { HomePage } from '../pages/home/home';
-import { SignupPage } from '../pages/signup/signup';
-import { TabsPage } from '../pages/tabs-page/tabs-page';
-import { TutorialPage } from '../pages/tutorial/tutorial';
-import { SchedulePage } from '../pages/schedule/schedule';
-import { SpeakerListPage } from '../pages/speaker-list/speaker-list';
-import { SupportPage } from '../pages/support/support';
+//import { SignupPage } from '../pages/signup/signup'; 
+import { CompletedSurveysPage } from '../pages/completed-surveys/completed-surveys';
 
+import { PausedSurveysPage } from '../pages/paused-surveys/paused-surveys';
+import { TutorialPage } from '../pages/tutorial/tutorial';
+//import { SchedulePage } from '../pages/schedule/schedule'; 
+//import { SpeakerListPage } from '../pages/speaker-list/speake ;
+import { EditProfilePage } from '../pages/edit-profile/edit-profile';
+import { SurveyHolder } from '../services/SurveyHolder';
 import { ConferenceData } from '../providers/conference-data';
 import { UserData } from '../providers/user-data';
 import { AuthProvider } from '../providers/auth/auth';
@@ -45,21 +47,24 @@ export class ConferenceApp {
   // the left menu only works after login
   // the login page disables the left menu
   appPages: PageInterface[] = [
-    { title: 'Schedule', name: 'TabsPage', component: TabsPage, tabComponent: SchedulePage, index: 0, icon: 'calendar' },
-    { title: 'Speakers', name: 'TabsPage', component: TabsPage, tabComponent: SpeakerListPage, index: 1, icon: 'contacts' },
-    { title: 'Map', name: 'TabsPage', component: TabsPage, tabComponent: MapPage, index: 2, icon: 'map' },
-    { title: 'About', name: 'TabsPage', component: TabsPage, tabComponent: AboutPage, index: 3, icon: 'information-circle' },
-    { title: 'Home', name: 'HomePage', component: HomePage, tabComponent: HomePage, index: 3, icon: 'information-circle' }
+    //{ title: 'Schedule', name: 'TabsPage', component: TabsPage, tabComponent: SchedulePage, index: 0, icon: 'calendar' },
+    //{ title: 'Speakers', name: 'TabsPage', component: TabsPage, tabComponent: SpeakerListPage, index: 1, icon: 'contacts' },
+    //{ title: 'Map', name: 'TabsPage', component: TabsPage, tabComponent: MapPage, index: 2, icon: 'map' },
+    //{ title: 'About', name: 'TabsPage', component: TabsPage, tabComponent: AboutPage, index: 3, icon: 'information-circle' },
+    //{ title: 'Home', name: 'HomePage', component: HomePage, tabComponent: HomePage, index: 3, icon: 'information-circle' }
   ];
   loggedInPages: PageInterface[] = [
-    { title: 'Account', name: 'AccountPage', component: AccountPage, icon: 'person' },
-    { title: 'Support', name: 'SupportPage', component: SupportPage, icon: 'help' },
-    { title: 'Logout', name: 'TabsPage', component: TabsPage, icon: 'log-out', logsOut: true }
+    { title: 'Home', name: 'HomePage', component: HomePage, icon: 'home' },
+    { title: 'Editar Perfil', name: 'EditProfilePage', component: EditProfilePage, icon: 'contact' },
+    { title: 'Encuestas Completas', name: 'CompletedSurveysPage', component: CompletedSurveysPage, icon: 'clipboard' },
+    { title: 'Encuestas Pausadas', name: 'PausedSurveysPage', component: PausedSurveysPage, icon: 'clock' }
   ];
+
+
   loggedOutPages: PageInterface[] = [
-    { title: 'Login', name: 'LoginPage', component: LoginPage, icon: 'log-in' },
-    { title: 'Support', name: 'SupportPage', component: SupportPage, icon: 'help' },
-    { title: 'Signup', name: 'SignupPage', component: SignupPage, icon: 'person-add' }
+    // { title: 'Login', name: 'LoginPage', component: LoginPage, icon: 'log-in' },
+    // { title: 'Support', name: 'SupportPage', component: SupportPage, icon: 'help' },
+    //{ title: 'Signup', name: 'SignupPage', component: SignupPage, icon: 'person-add' }
   ];
   rootPage: any;
 
@@ -71,7 +76,9 @@ export class ConferenceApp {
     public platform: Platform,
     public confData: ConferenceData,
     public storage: Storage,
-    public splashScreen: SplashScreen
+    public alertCtrl: AlertController,
+    public splashScreen: SplashScreen,
+    public surveyHolder: SurveyHolder
   ) {
 
     firebase.initializeApp({
@@ -82,6 +89,8 @@ export class ConferenceApp {
       storageBucket: "equipospregunta.appspot.com",
       messagingSenderId: "332351806740"
     });
+
+
     /*
     this.storage.get('hasSeenTutorial')
       .then((hasSeenTutorial) => {
@@ -99,29 +108,27 @@ export class ConferenceApp {
       if (!user) {
         this.rootPage = LoginPage;
         unsubscribe();
-      } else { 
-        this.userData.login(user);
+      } else {
+        this.enableMenu(true);
+        this.userData.login(user, firebase.database().ref(`/userProfile/${user.uid}`));
+
         this.rootPage = HomePage;
         unsubscribe();
+        
       }
       this.platformReady()
+      this.surveyHolder.setNav(this.nav);
     });
 
     // load the conference data
     confData.load();
 
-    // decide which menu items should be hidden by current login status stored in local storage
-    this.userData.hasLoggedIn().then((hasLoggedIn) => {
-      this.enableMenu(hasLoggedIn === true);
-    });
-    this.enableMenu(true);
-
     this.listenToLoginEvents();
+
   }
 
   openPage(page: PageInterface) {
     let params = {};
-
     // the nav component was found using @ViewChild(Nav)
     // setRoot on the nav to remove previous pages and only have this page
     // we wouldn't want the back button to show in this scenario
@@ -177,9 +184,64 @@ export class ConferenceApp {
     });
   }
 
-  logout(){
+  logout() {
     this.authProvider.logoutUser();
     this.nav.setRoot(LoginPage);
+  }
+
+  pauseSurvey() {
+    let alert = this.alertCtrl.create({
+      title: 'Desea pausar la encuesta?',
+      subTitle: 'Podrá seguir respondiendo la encuesta luego.',
+      buttons: [{
+        text: 'Si',
+        handler: () => {
+          this.menu.enable(false, 'surveyMenu');
+          this.menu.enable(true, 'loggedInMenu');
+          let surveyData = this.surveyHolder.getSurveyDataToLocallyPersist();
+          this.storage.set(<string>surveyData.survey.title, surveyData);
+          this.storage.get('surveyList').then((value) => {
+            if (!value) {
+              let surveyList: { surveyName: string, pausedDate: Date }[] = [];
+              surveyList.push({surveyName:<string>surveyData.survey.title, pausedDate:new Date()});
+              this.storage.set('surveyList',surveyList);
+            } else {
+              let surveyList: { surveyName: string, pausedDate: Date }[] = value;
+              surveyList.push({surveyName:<string>surveyData.survey.title, pausedDate:new Date()});
+              this.storage.set('surveyList',surveyList);
+            }
+          });
+
+
+          this.nav.setRoot(HomePage);
+        }
+      }, {
+        text: 'No',
+        role: 'cancel'
+      }
+      ]
+    });
+    alert.present();
+  }
+
+  abortSurvey() {
+    let alert = this.alertCtrl.create({
+      title: 'Desea abortar la encuesta?',
+      subTitle: 'Si aborta la encuesta se perderan las respuestas ingresadas.',
+      buttons: [{
+        text: 'Si',
+        handler: () => {
+          this.menu.enable(false, 'surveyMenu');
+          this.menu.enable(true, 'loggedInMenu');
+          this.nav.setRoot(HomePage);
+        }
+      }, {
+        text: 'No',
+        role: 'cancel'
+      }
+      ]
+    });
+    alert.present();
   }
 
   isActive(page: PageInterface) {

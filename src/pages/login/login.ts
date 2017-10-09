@@ -11,6 +11,8 @@ import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { EmailValidator } from '../../validators/EmailValidator';
 import { AuthProvider } from '../../providers/auth/auth';
 import { UserData } from '../../providers/user-data';
+import firebase from 'firebase';
+
 @Component({
   selector: 'page-user',
   templateUrl: 'login.html'
@@ -42,7 +44,7 @@ export class LoginPage {
         .then(user => {
           debugger;
           console.log(user);
-          this.userData.login(user);
+          this.userData.login(user,firebase.database().ref(`/userProfile/${user.uid}`));
           this.loading.dismiss();
           this.navCtrl.setRoot(HomePage);
         }, (error) => {
