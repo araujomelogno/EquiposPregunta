@@ -1,3 +1,4 @@
+import {QuestionJump} from './QuestionJump';
 export class Question {
     questionType: string;
     answer: any; //the answer
@@ -16,6 +17,7 @@ export class Question {
     maxLabel: string;
     options: { key: string, value: string, answer: any }[] = [];
     rows: { key: string, value: string, answer: any }[] = [];
+    jumps : [QuestionJump];
     constructor(
         public params: {
             answer?: any,

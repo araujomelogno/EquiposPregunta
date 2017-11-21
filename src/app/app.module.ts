@@ -8,6 +8,7 @@ import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { IonicStorageModule } from '@ionic/storage';
+import { Push } from '@ionic-native/push';
 
 import { ConferenceApp } from './app.component';
 import { SurveyProvider } from '../providers/survey-provider';
@@ -29,6 +30,8 @@ import { SpeakerListPage } from '../pages/speaker-list/speaker-list';
 import { TabsPage } from '../pages/tabs-page/tabs-page';
 import { TutorialPage } from '../pages/tutorial/tutorial';
 import { SupportPage } from '../pages/support/support';
+import { CatalogViewPage } from '../pages/catalog-view/catalog-view';
+import { PrizeListPage } from '../pages/prize-list/prize-list';
 
 import { ConferenceData } from '../providers/conference-data';
 import { UserData } from '../providers/user-data';
@@ -80,7 +83,9 @@ const cloudSettings: CloudSettings = {
     TabsPage,
     TutorialPage,
     SupportPage,
-    ResetPasswordPage
+    ResetPasswordPage,
+    CatalogViewPage,
+    PrizeListPage
   ],
   imports: [
     BrowserModule,
@@ -103,7 +108,9 @@ const cloudSettings: CloudSettings = {
         { component: EditProfilePage, name: 'EditProfilePage', segment: 'profile' },
         { component: HomePage, name: 'HomePage', segment: 'home' },
         { component: CompletedSurveysPage, name: 'CompletedSurveysPage', segment: 'home' },
-        { component: PausedSurveysPage, name: 'PausedSurveysPage', segment: 'home' }
+        { component: PausedSurveysPage, name: 'PausedSurveysPage', segment: 'home' },
+        { component: PrizeListPage, name: 'PrizeListPage', segment: 'home' },
+        { component: CatalogViewPage, name: 'CatalogViewPage', segment: 'home' }
       ]
     }),
     CloudModule.forRoot(cloudSettings),
@@ -137,7 +144,9 @@ const cloudSettings: CloudSettings = {
     TabsPage,
     TutorialPage,
     SupportPage,
-    ResetPasswordPage
+    ResetPasswordPage,
+    PrizeListPage,
+    CatalogViewPage
   ],
   providers: [
     { provide: ErrorHandler, useClass: IonicErrorHandler },
@@ -147,9 +156,8 @@ const cloudSettings: CloudSettings = {
     SplashScreen,
     SurveyHolder,
     SurveyProvider,
-    AuthProvider, 
-    
-    Storage
+    AuthProvider,
+    Push
   ]
 })
 export class AppModule { }

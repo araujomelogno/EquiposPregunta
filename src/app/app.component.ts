@@ -24,6 +24,10 @@ import { UserData } from '../providers/user-data';
 import { AuthProvider } from '../providers/auth/auth';
 import firebase from 'firebase';
 
+import { CatalogViewPage } from '../pages/catalog-view/catalog-view';
+import { PrizeListPage } from '../pages/prize-list/prize-list';
+import { Push, PushObject, PushOptions } from '@ionic-native/push';
+
 export interface PageInterface {
   title: string;
   name: string;
@@ -55,9 +59,11 @@ export class ConferenceApp {
   ];
   loggedInPages: PageInterface[] = [
     { title: 'Home', name: 'HomePage', component: HomePage, icon: 'home' },
-    { title: 'Editar Perfil', name: 'EditProfilePage', component: EditProfilePage, icon: 'contact' },
-    { title: 'Encuestas Completas', name: 'CompletedSurveysPage', component: CompletedSurveysPage, icon: 'clipboard' },
-    { title: 'Encuestas Pausadas', name: 'PausedSurveysPage', component: PausedSurveysPage, icon: 'clock' }
+    { title: 'Editar perfil', name: 'EditProfilePage', component: EditProfilePage, icon: 'contact' },
+    { title: 'Encuestas completas', name: 'CompletedSurveysPage', component: CompletedSurveysPage, icon: 'clipboard' },
+    { title: 'Encuestas pausadas', name: 'PausedSurveysPage', component: PausedSurveysPage, icon: 'clock' },
+    { title: 'Mis premios', name: 'PrizeListPage', component: PrizeListPage, icon: 'cash' },
+    { title: 'Catálogo de premios', name: 'CatalogViewPage', component: CatalogViewPage, icon: 'book' }
   ];
 
 
@@ -78,7 +84,7 @@ export class ConferenceApp {
     public storage: Storage,
     public alertCtrl: AlertController,
     public splashScreen: SplashScreen,
-    public surveyHolder: SurveyHolder
+    public surveyHolder: SurveyHolder, public push: Push
   ) {
 
     firebase.initializeApp({
@@ -114,9 +120,10 @@ export class ConferenceApp {
 
         this.rootPage = HomePage;
         unsubscribe();
-        
+
       }
       this.platformReady()
+
       this.surveyHolder.setNav(this.nav);
     });
 
@@ -126,6 +133,8 @@ export class ConferenceApp {
     this.listenToLoginEvents();
 
   }
+
+
 
   openPage(page: PageInterface) {
     let params = {};
@@ -180,10 +189,42 @@ export class ConferenceApp {
   platformReady() {
     // Call any initial plugins when ready
     this.platform.ready().then(() => {
+      this.pushsetup();
       this.splashScreen.hide();
     });
   }
 
+  pushsetup() {
+    const options: PushOptions = {
+      android: { 
+        senderID:'332351806740'
+      },
+      ios: {
+        alert: 'true',
+        badge: true,
+        sound: 'false'
+      },
+      windows: {}
+    };
+
+    const pushObject: PushObject = this.push.init(options);
+
+    pushObject.on('notification').subscribe((notification: any) => {
+      if (notification.additionalData.foreground) {
+        let youralert = this.alertCtrl.create({
+          title: 'New Push notification',
+          message: notification.message
+        });
+        youralert.present();
+      }
+    });
+
+    pushObject.on('registration').subscribe((registration: any) => {
+      alert(registration.registrationId);
+    });
+
+    pushObject.on('error').subscribe(error => alert('Error with Push plugin' + error));
+  }
   logout() {
     this.authProvider.logoutUser();
     this.nav.setRoot(LoginPage);
@@ -203,12 +244,12 @@ export class ConferenceApp {
           this.storage.get('surveyList').then((value) => {
             if (!value) {
               let surveyList: { surveyName: string, pausedDate: Date }[] = [];
-              surveyList.push({surveyName:<string>surveyData.survey.title, pausedDate:new Date()});
-              this.storage.set('surveyList',surveyList);
+              surveyList.push({ surveyName: <string>surveyData.survey.title, pausedDate: new Date() });
+              this.storage.set('surveyList', surveyList);
             } else {
               let surveyList: { surveyName: string, pausedDate: Date }[] = value;
-              surveyList.push({surveyName:<string>surveyData.survey.title, pausedDate:new Date()});
-              this.storage.set('surveyList',surveyList);
+              surveyList.push({ surveyName: <string>surveyData.survey.title, pausedDate: new Date() });
+              this.storage.set('surveyList', surveyList);
             }
           });
 

@@ -105,7 +105,7 @@ export class EditProfilePage {
 
             this.userData.updateEmail(data.newEmail, data.password).then(() => {
               this.userProfile.email = newEmail;
-            }).catch(error => {
+            }).catch((error:any) => {
               console.log('ERROR: ' + error.message);
             });
           }

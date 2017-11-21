@@ -41,13 +41,13 @@ export class LoginPage {
     } else {
       this.authProvider.loginUser(this.loginForm.value.email,
         this.loginForm.value.password)
-        .then(user => {
-          debugger;
+        .then((user: any) => {
+          if (this.loading != null)
+            this.loading.dismiss();
           console.log(user);
-          this.userData.login(user,firebase.database().ref(`/userProfile/${user.uid}`));
-          this.loading.dismiss();
+          this.userData.login(user, firebase.database().ref(`/userProfile/${user.uid}`));
           this.navCtrl.setRoot(HomePage);
-        }, (error) => {
+        }, (error: any) => {
           this.loading.dismiss().then(() => {
             let alert = this.alertCtrl.create({
               message: error.message,

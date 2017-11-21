@@ -27,21 +27,21 @@ export class UserData {
     return this.userProfile;
   }
 
-  updateName(firstName: string, lastName: string): firebase.Promise<void> {
+  updateName(firstName: string, lastName: string): Promise<void> {
     return this.userProfile.update({
       firstName: firstName,
       lastName: lastName,
     });
   }
 
-  updateDOB(birthDate: string): firebase.Promise<any> {
+  updateDOB(birthDate: string): Promise<any> {
     return this.userProfile.update({
       birthDate: birthDate,
     });
   }
 
 
-  updateSex(sex: string): firebase.Promise<any> {
+  updateSex(sex: string): Promise<any> {
     return this.userProfile.update({
       sex: sex,
     });
@@ -49,13 +49,13 @@ export class UserData {
 
 
 
-  updateLocation(location: string): firebase.Promise<any> {
+  updateLocation(location: string): Promise<any> {
     return this.userProfile.update({
       location: location,
     });
   }
 
-  updateEmail(newEmail: string, password: string): firebase.Promise<any> {
+  updateEmail(newEmail: string, password: string): Promise<any> {
     const credential = firebase.auth.EmailAuthProvider
       .credential(<string>this.currentUser.email, password);
 
@@ -66,7 +66,7 @@ export class UserData {
     });
   }
 
-  updatePassword(newPassword: string, oldPassword: string): firebase.Promise<any> {
+  updatePassword(newPassword: string, oldPassword: string): Promise<any> {
     const credential = firebase.auth.EmailAuthProvider
       .credential(<string>this.currentUser.email, oldPassword);
 

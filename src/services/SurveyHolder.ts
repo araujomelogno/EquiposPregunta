@@ -26,7 +26,7 @@ export class SurveyHolder {
 
     surveyStarted: Date;
     surveyEnded: Date;
-    nav:NavController;
+    nav: NavController;
     constructor(public menu: MenuController, public userData: UserData,
         public surveyProvider: SurveyProvider, public loadingController: LoadingController,
         public authProvider: AuthProvider, public alertCtrl: AlertController,
@@ -34,7 +34,7 @@ export class SurveyHolder {
         public toastCtrl: ToastController, public actionController: ActionSheetController) {
     }
 
-    setStarted(started:Date){
+    setStarted(started: Date) {
         this.surveyStarted = started;
     }
     setCurrentQuestionIndex(index: number) {
@@ -61,7 +61,7 @@ export class SurveyHolder {
         };
     }
 
-    setNav(anav: NavController){
+    setNav(anav: NavController) {
         this.nav = anav;
     }
 
@@ -81,7 +81,7 @@ export class SurveyHolder {
         }
     }
 
-    enableInSurveyMenu(){
+    enableInSurveyMenu() {
         this.menu.enable(false, 'loggedInMenu');
         this.menu.enable(true, 'surveyMenu');
     }
@@ -105,17 +105,76 @@ export class SurveyHolder {
         }
 
     }
-
+    getAnswer(questionlabel: string) {
+        for (let entry of this.surveyAnswers) {
+            if (entry.questionLabel == questionlabel) {
+                return entry.answer;
+            }
+        }
+        return '';
+    }
     next() {
-        if (this.survey.questions[this.currentQuestionIndex + 1] != null) {
+
+        let jumpDestinationLabel = '';
+        if (this.survey.questions[this.currentQuestionIndex].jumps != null && this.survey.questions[this.currentQuestionIndex].jumps.length > 0) {
+            let index = 0;
+            let currentQuestionAnwer = this.getAnswer(this.survey.questions[this.currentQuestionIndex].label);
+            while (index < this.survey.questions[this.currentQuestionIndex].jumps.length &&
+                jumpDestinationLabel == '') {
+                let jump = this.survey.questions[this.currentQuestionIndex].jumps[index];
+                let answer: String = '';
+                if (jump.comparissonValue != null) {
+                    answer = jump.comparissonValue;
+                } else {
+                    answer = this.getAnswer(jump.comparissonLabel);
+                }
+                if (jump.conditionOperator == '==') {
+                    if (currentQuestionAnwer == answer) {
+                        jumpDestinationLabel = this.survey.questions[this.currentQuestionIndex].label;
+                    }
+
+                } else if (jump.conditionOperator == '>') {
+                    if (currentQuestionAnwer > answer) {
+                        jumpDestinationLabel = this.survey.questions[this.currentQuestionIndex].label;
+                    }
+                } else if (jump.conditionOperator == '<') {
+                    if (currentQuestionAnwer < answer) {
+                        jumpDestinationLabel = this.survey.questions[this.currentQuestionIndex].label;
+                    }
+                } else if (jump.conditionOperator == '!=') {
+                    if (currentQuestionAnwer != answer) {
+                        jumpDestinationLabel = this.survey.questions[this.currentQuestionIndex].label;
+                    }
+                }
+                index = index + 1;
+            }
+
+        }
+        if (jumpDestinationLabel != '') {
+            let aux = this.getQuestionIndex(jumpDestinationLabel);
+            if (aux != -1) {
+                this.currentQuestionIndex = aux;
+            }
+        } else {
             this.currentQuestionIndex = this.currentQuestionIndex + 1;
+        }
+        if (this.survey.questions[this.currentQuestionIndex] != null) {
             this.gotoQuestion();
         } else {
             this.endSurvey();
         }
-
     }
 
+    getQuestionIndex(jumpDestinationLabel: String) {
+        let index = 0;
+        for (let question of this.survey.questions) {
+            if (question.label == jumpDestinationLabel) {
+                return index;
+            }
+            index = index + 1;
+        }
+        return -1;
+    }
     prev() {
         this.currentQuestionIndex = this.currentQuestionIndex - 1;
         this.gotoQuestion();
