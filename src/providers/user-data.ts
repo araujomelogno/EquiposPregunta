@@ -11,7 +11,6 @@ export class UserData {
   _favorites: string[] = [];
   HAS_LOGGED_IN = 'hasLoggedIn';
   HAS_SEEN_TUTORIAL = 'hasSeenTutorial';
-
   public userProfile: firebase.database.Reference;
   public currentUser: firebase.User;
 
